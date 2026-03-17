@@ -1,31 +1,31 @@
 import java.util.*;
 
 /**
- * UC9: Error Handling
+ * UC10: Cancellation
  */
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        try {
-            validate("InvalidRoom");
-        } catch (InvalidBookingException e) {
-            System.out.println(e.getMessage());
-        }
-    }
+        CancellationService service = new CancellationService();
 
-    static void validate(String roomType) throws InvalidBookingException {
-        List<String> valid = Arrays.asList("Single", "Double", "Suite");
-
-        if (!valid.contains(roomType)) {
-            throw new InvalidBookingException("Invalid Room Type!");
-        }
+        service.book("Single-1");
+        service.cancel();
     }
 }
 
-// Custom Exception
-class InvalidBookingException extends Exception {
-    InvalidBookingException(String msg) {
-        super(msg);
+class CancellationService {
+
+    Stack<String> stack = new Stack<>();
+
+    void book(String roomId) {
+        stack.push(roomId);
+        System.out.println("Booked: " + roomId);
+    }
+
+    void cancel() {
+        if (!stack.isEmpty()) {
+            System.out.println("Cancelled: " + stack.pop());
+        }
     }
 }

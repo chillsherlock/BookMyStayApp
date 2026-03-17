@@ -1,34 +1,32 @@
+import java.io.*;
 import java.util.*;
 
 /**
- * UC11: Concurrency
+ * UC12: Persistence
  */
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        BookingService service = new BookingService();
+        List<String> data = Arrays.asList("Booking1", "Booking2");
 
-        Runnable task = () -> service.book();
+        try {
+            // Save
+            ObjectOutputStream out = new ObjectOutputStream(
+                    new FileOutputStream("data.ser"));
+            out.writeObject(data);
+            out.close();
 
-        Thread t1 = new Thread(task);
-        Thread t2 = new Thread(task);
+            // Load
+            ObjectInputStream in = new ObjectInputStream(
+                    new FileInputStream("data.ser"));
+            List<String> loaded = (List<String>) in.readObject();
+            in.close();
 
-        t1.start();
-        t2.start();
-    }
-}
+            System.out.println("Recovered Data: " + loaded);
 
-class BookingService {
-
-    int rooms = 1;
-
-    synchronized void book() {
-        if (rooms > 0) {
-            System.out.println(Thread.currentThread().getName() + " booked");
-            rooms--;
-        } else {
-            System.out.println("No rooms left");
+        } catch (Exception e) {
+            System.out.println("Error in persistence");
         }
     }
 }

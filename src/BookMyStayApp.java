@@ -1,58 +1,44 @@
 import java.util.*;
 
 /**
- * UC7: Add-On Services
- * @version 7.0
+ * UC8: Booking History
  */
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        String reservationId = "R1";
+        BookingHistory history = new BookingHistory();
 
-        AddOnService wifi = new AddOnService("WiFi", 200);
-        AddOnService breakfast = new AddOnService("Breakfast", 300);
+        history.add(new Reservation("Alice", "Single"));
+        history.add(new Reservation("Bob", "Double"));
 
-        AddOnServiceManager manager = new AddOnServiceManager();
-
-        manager.addService(reservationId, wifi);
-        manager.addService(reservationId, breakfast);
-
-        manager.displayServices(reservationId);
+        history.showHistory();
     }
 }
 
-// Service
-class AddOnService {
+class Reservation {
     String name;
-    int cost;
+    String roomType;
 
-    AddOnService(String name, int cost) {
+    Reservation(String name, String roomType) {
         this.name = name;
-        this.cost = cost;
+        this.roomType = roomType;
     }
 }
 
-// Manager
-class AddOnServiceManager {
+class BookingHistory {
 
-    Map<String, List<AddOnService>> map = new HashMap<>();
+    List<Reservation> list = new ArrayList<>();
 
-    void addService(String reservationId, AddOnService service) {
-        map.putIfAbsent(reservationId, new ArrayList<>());
-        map.get(reservationId).add(service);
+    void add(Reservation r) {
+        list.add(r);
     }
 
-    void displayServices(String reservationId) {
-        int total = 0;
+    void showHistory() {
+        System.out.println("Booking History:");
 
-        System.out.println("Services for " + reservationId);
-
-        for (AddOnService s : map.get(reservationId)) {
-            System.out.println(s.name + " - " + s.cost);
-            total += s.cost;
+        for (Reservation r : list) {
+            System.out.println(r.name + " -> " + r.roomType);
         }
-
-        System.out.println("Total Add-On Cost: " + total);
     }
 }

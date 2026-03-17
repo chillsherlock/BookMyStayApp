@@ -1,46 +1,73 @@
-import java.util.*;
+import java.util.HashMap;
 
 /**
- * UC5: Booking Queue (FIFO)
- * @version 5.0
+ * UC4: Room Search
+ * @version 4.0
  */
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        BookingQueue queue = new BookingQueue();
+        RoomInventory inventory = new RoomInventory();
 
-        queue.addRequest(new Reservation("Alice", "Single"));
-        queue.addRequest(new Reservation("Bob", "Double"));
+        Room[] rooms = {
+                new SingleRoom(),
+                new DoubleRoom(),
+                new SuiteRoom()
+        };
 
-        System.out.println("Booking Requests:");
+        System.out.println("Available Rooms:");
 
-        queue.displayQueue();
-    }
-}
+        for (Room room : rooms) {
+            int available = inventory.getAvailability(room.type);
 
-// Reservation
-class Reservation {
-    String name;
-    String roomType;
-
-    Reservation(String name, String roomType) {
-        this.name = name;
-        this.roomType = roomType;
-    }
-}
-
-// Queue
-class BookingQueue {
-    Queue<Reservation> queue = new LinkedList<>();
-
-    void addRequest(Reservation r) {
-        queue.add(r);
-    }
-
-    void displayQueue() {
-        for (Reservation r : queue) {
-            System.out.println(r.name + " -> " + r.roomType);
+            if (available > 0) {
+                room.display();
+                System.out.println("Available: " + available);
+            }
         }
     }
+}
+
+// Inventory
+class RoomInventory {
+    private HashMap<String, Integer> inventory = new HashMap<>();
+
+    public RoomInventory() {
+        inventory.put("Single", 5);
+        inventory.put("Double", 3);
+        inventory.put("Suite", 2);
+    }
+
+    public int getAvailability(String type) {
+        return inventory.getOrDefault(type, 0);
+    }
+}
+
+// Room classes
+abstract class Room {
+    protected String type;
+    protected int price;
+
+    public Room(String type, int price) {
+        this.type = type;
+        this.price = price;
+    }
+
+    public abstract void display();
+}
+
+class SingleRoom extends Room {
+    public SingleRoom() { super("Single", 1000); }
+    public void display() { System.out.println("Single Room - " + price); }
+}
+
+class DoubleRoom extends Room {
+    public DoubleRoom() { super("Double", 2000); }
+    public void display() { System.out.println("Double Room - " + price); }
+}
+
+class SuiteRoom extends Room {
+    public SuiteRoom() { super("Suite", 5000); }
+    public void display() { System.out.println("Suite Room - " + price); }
 }

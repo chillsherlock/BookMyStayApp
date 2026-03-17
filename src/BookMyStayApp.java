@@ -1,73 +1,95 @@
+import java.util.*;
+
 /**
- * Book My Stay App
- * UC2: Room Modeling
- * @version 2.0
+ * UC6: Room Allocation
+ * @version 6.0
  */
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        System.out.println("Book My Stay App - v2.0");
+        RoomInventory inventory = new RoomInventory();
+        BookingQueue queue = new BookingQueue();
 
-        Room single = new SingleRoom();
-        Room doubleRoom = new DoubleRoom();
-        Room suite = new SuiteRoom();
+        queue.addRequest(new Reservation("Alice", "Single"));
+        queue.addRequest(new Reservation("Bob", "Single"));
 
-        int singleAvailable = 5;
-        int doubleAvailable = 3;
-        int suiteAvailable = 2;
+        BookingService service = new BookingService(inventory);
 
-        single.display();
-        System.out.println("Available: " + singleAvailable);
-
-        doubleRoom.display();
-        System.out.println("Available: " + doubleAvailable);
-
-        suite.display();
-        System.out.println("Available: " + suiteAvailable);
+        Reservation r;
+        while ((r = queue.getNext()) != null) {
+            service.allocate(r);
+        }
     }
 }
 
-// Abstract class
-abstract class Room {
-    protected String type;
-    protected int price;
+// Inventory
+class RoomInventory {
+    HashMap<String, Integer> inventory = new HashMap<>();
 
-    public Room(String type, int price) {
-        this.type = type;
-        this.price = price;
+    public RoomInventory() {
+        inventory.put("Single", 2);
     }
 
-    public abstract void display();
-}
-
-// Child classes
-class SingleRoom extends Room {
-    public SingleRoom() {
-        super("Single", 1000);
+    int getAvailability(String type) {
+        return inventory.getOrDefault(type, 0);
     }
 
-    public void display() {
-        System.out.println("Single Room - Price: " + price);
+    void update(String type, int count) {
+        inventory.put(type, count);
     }
 }
 
-class DoubleRoom extends Room {
-    public DoubleRoom() {
-        super("Double", 2000);
-    }
+// Reservation
+class Reservation {
+    String name;
+    String roomType;
 
-    public void display() {
-        System.out.println("Double Room - Price: " + price);
+    Reservation(String name, String roomType) {
+        this.name = name;
+        this.roomType = roomType;
     }
 }
 
-class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super("Suite", 5000);
+// Queue
+class BookingQueue {
+    Queue<Reservation> queue = new LinkedList<>();
+
+    void addRequest(Reservation r) {
+        queue.add(r);
     }
 
-    public void display() {
-        System.out.println("Suite Room - Price: " + price);
+    Reservation getNext() {
+        return queue.poll();
+    }
+}
+
+// Booking Service
+class BookingService {
+
+    RoomInventory inventory;
+    HashMap<String, Set<String>> allocated = new HashMap<>();
+
+    BookingService(RoomInventory inventory) {
+        this.inventory = inventory;
+    }
+
+    void allocate(Reservation r) {
+
+        int available = inventory.getAvailability(r.roomType);
+
+        if (available <= 0) {
+            System.out.println("No rooms available");
+            return;
+        }
+
+        String roomId = r.roomType + "-" + available;
+
+        allocated.putIfAbsent(r.roomType, new HashSet<>());
+        allocated.get(r.roomType).add(roomId);
+
+        inventory.update(r.roomType, available - 1);
+
+        System.out.println("Booked: " + r.name + " -> " + roomId);
     }
 }
